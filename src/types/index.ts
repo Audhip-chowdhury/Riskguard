@@ -55,3 +55,65 @@ export interface ScoringFactor {
   description: string | null;
   updated_at: string;
 }
+
+export interface LoanApplication {
+  id: string;
+  borrower_id: string;
+  product_type: string;
+  requested_amount: number;
+  requested_tenure_months: number | null;
+  purpose: string;
+  status: string;
+  approval_tier: string | null;
+  score_at_application: number;
+  band_at_application: string;
+  available_limit_at_application: number;
+  debt_ratio_at_application: number | null;
+  submitted_at: string;
+  reviewed_by_user_id: string | null;
+  reviewed_at: string | null;
+  committee_reviewed_by_user_id: string | null;
+  committee_reviewed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Loan {
+  id: string;
+  application_id: string;
+  borrower_id: string;
+  product_type: string;
+  principal_amount: number;
+  tenure_months: number | null;
+  annual_interest_rate_bps: number;
+  processing_fee_amount: number;
+  status: string;
+  approved_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UnderwritingDecision {
+  id: string;
+  application_id: string;
+  decision: string;
+  decided_by_user_id: string;
+  decision_tier: string;
+  notes: string | null;
+  rules_evaluated: string | null;
+  decided_at: string;
+}
+
+export interface Appeal {
+  id: string;
+  application_id: string;
+  borrower_id: string;
+  reason: string;
+  additional_info: string | null;
+  status: string;
+  reviewed_by_user_id: string | null;
+  reviewed_at: string | null;
+  review_notes: string | null;
+  created_at: string;
+}

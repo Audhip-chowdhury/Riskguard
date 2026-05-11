@@ -15,9 +15,14 @@ export const testUserIds: Record<string, string> = {};
 export const testEmployeeIds: Record<string, string> = {};
 
 beforeAll(() => {
-  // Wipe and re-create schema
+  // Wipe and re-create schema (Phase 2 tables listed before Phase 1 to respect FK order)
   db.exec('PRAGMA foreign_keys = OFF');
   db.exec(`
+    DROP TABLE IF EXISTS appeals;
+    DROP TABLE IF EXISTS underwriting_decisions;
+    DROP TABLE IF EXISTS loans;
+    DROP TABLE IF EXISTS loan_applications;
+    DROP TABLE IF EXISTS interest_rate_config;
     DROP TABLE IF EXISTS score_snapshots;
     DROP TABLE IF EXISTS manual_adjustments;
     DROP TABLE IF EXISTS borrowers;
@@ -32,14 +37,22 @@ beforeAll(() => {
   runMigrations();
 
   const users = [
-    { username: 'alice',   role: 'admin',              department: 'Finance',     designation: 'CFO',              salary: 50000000, tenure_years: 8,   risk_tier: 1 },
-    { username: 'bob',     role: 'senior_underwriter', department: 'Risk',        designation: 'Head of Risk',     salary: 35000000, tenure_years: 5,   risk_tier: 1 },
-    { username: 'charlie', role: 'underwriter',        department: 'Risk',        designation: 'Underwriter',      salary: 18000000, tenure_years: 3,   risk_tier: 2 },
-    { username: 'frank',   role: 'employee',           department: 'Engineering', designation: 'Senior Engineer',  salary: 22000000, tenure_years: 3,   risk_tier: 3 },
-    { username: 'iris',    role: 'employee',           department: 'Sales',       designation: 'Sales Rep',        salary: 8000000,  tenure_years: 0.3, risk_tier: 5 },
-    { username: 'jack',    role: 'employee',           department: 'Engineering', designation: 'Engineer',         salary: 0,        tenure_years: 0.1, risk_tier: 3 },
+    { username: 'alice',   role: 'admin',              department: 'Finance',     designation: 'CFO',                salary: 50000000,  tenure_years: 8,   risk_tier: 1 },
+    { username: 'bob',     role: 'senior_underwriter', department: 'Risk',        designation: 'Head of Risk',       salary: 35000000,  tenure_years: 5,   risk_tier: 1 },
+    { username: 'charlie', role: 'underwriter',        department: 'Risk',        designation: 'Underwriter',        salary: 18000000,  tenure_years: 3,   risk_tier: 2 },
+    // diana: second senior_underwriter for committee second-approval tests
+    { username: 'diana',   role: 'senior_underwriter', department: 'Risk',        designation: 'Senior Underwriter', salary: 28000000,  tenure_years: 6,   risk_tier: 1 },
+    // frank: employee whose manager will be charlie (for RG-006 conflict-of-interest test)
+    { username: 'frank',   role: 'employee',           department: 'Engineering', designation: 'Senior Engineer',    salary: 22000000,  tenure_years: 3,   risk_tier: 3 },
+    { username: 'iris',    role: 'employee',           department: 'Sales',       designation: 'Sales Rep',          salary: 8000000,   tenure_years: 0.3, risk_tier: 5 },
+    { username: 'jack',    role: 'employee',           department: 'Engineering', designation: 'Engineer',           salary: 0,         tenure_years: 0.1, risk_tier: 3 },
+    // evan: second plain underwriter (for committee second-approval rejection test)
+    { username: 'evan',    role: 'underwriter',        department: 'Risk',        designation: 'Junior Underwriter', salary: 15000000,  tenure_years: 2,   risk_tier: 2 },
+    // grace: high-salary employee for committee-review amount tests
+    { username: 'grace',   role: 'employee',           department: 'Executive',   designation: 'VP Engineering',    salary: 100000000, tenure_years: 10,  risk_tier: 1 },
   ];
 
+  // Insert all users (manager_user_id set later)
   for (const u of users) {
     const userId = uuidv4();
     const apiKey = generateApiKey();
@@ -63,4 +76,9 @@ beforeAll(() => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(employeeId, userId, uuidv4(), u.department, u.designation, u.risk_tier, u.salary, joinedAt, null, ts);
   }
+
+  // Set frank's manager to charlie (for BUG RG-006 conflict-of-interest test)
+  db.prepare(
+    `UPDATE employees SET manager_user_id = ? WHERE id = ?`
+  ).run(testUserIds['charlie'], testEmployeeIds['frank']);
 });
