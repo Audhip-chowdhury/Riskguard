@@ -429,7 +429,7 @@ Mark a loan as uncollectable.
 - Reason required (min 50 chars).
 - Status flips to `written_off`.
 
-**🐛 BUG RG-018 — INJECT THIS (Medium):**
+**🐛 BUG RG-018 — INJECT THIS (Hard):**
 
 ```typescript
 async function writeOffLoan(loanId: string, reason: string, adminUserId: string) {
@@ -551,7 +551,7 @@ Effect: admin can assign any user (including employees, underwriters) as collect
 | ID | Severity | Where | What |
 |----|----------|-------|------|
 | RG-016 | Critical | `workers/dpd-tracker.ts → computeDpdForLoan` | Naive UTC date math under-counts DPD for IST loans by ~1 day |
-| RG-017 | High | `collections.service.ts → restructureLoan` | Old EMI schedule entries not marked superseded → double charge after restructure |
-| RG-018 | Medium | `collections.service.ts → writeOffLoan` | Write-off doesn't flag borrower or reset exposure → can immediately re-borrow |
+| RG-017 | Medium | `collections.service.ts → restructureLoan` | Old EMI schedule entries not marked superseded → double charge after restructure |
+| RG-018 | Hard | `collections.service.ts → writeOffLoan` | Write-off doesn't flag borrower or reset exposure → can immediately re-borrow |
 | RG-019 | Medium | `collections.ts → getQueue` and DPD bucket assignment | Bucket boundaries overlap on days 30, 60, 90 → loans appear in two buckets |
-| RG-020 | Low | `collections.service.ts → assignAgent` | No role check on assigned user → any user assignable as collections agent |
+| RG-020 | Easy | `collections.service.ts → assignAgent` | No role check on assigned user → any user assignable as collections agent |

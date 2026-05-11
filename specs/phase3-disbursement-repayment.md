@@ -485,7 +485,7 @@ async function executeRepaymentCycle() {
 **🐛 BUG RG-012 — INJECT THIS (High):**
 Already shown above. The worker reads EMIs at start of cycle, processes them serially. Race condition: borrower can manually repay between fetch and worker debit, causing double-charge through PayFlow.
 
-**🐛 BUG RG-014 — INJECT THIS (Medium):**
+**🐛 BUG RG-014 — INJECT THIS (Easy):**
 
 ```typescript
 // Grace period: 5 days
@@ -566,7 +566,7 @@ if (daysPastDue >= 5) {  // off-by-one
 | ID | Severity | Where | What |
 |----|----------|-------|------|
 | RG-011 | Critical | `emi.service.ts → generateEmiSchedule` | Floating-point arithmetic causes residual non-zero balance at end of schedule → ghost outstanding |
-| RG-012 | High | `workers/repayment-executor.ts` | No status re-check before PayFlow debit → manual repayment + worker run = double charge |
-| RG-013 | High | `disbursement.service.ts → prepayLoan` | Prepayment penalty includes principal portion of current EMI → over-charged |
-| RG-014 | Medium | `workers/repayment-executor.ts` grace check | Grace period boundary off by one day — day 5 prematurely flagged overdue |
-| RG-015 | Low | `disbursement.service.ts → generateStatement` | Processing fee deducted at disbursement but missing from statement transactions |
+| RG-012 | Hard | `workers/repayment-executor.ts` | No status re-check before PayFlow debit → manual repayment + worker run = double charge |
+| RG-013 | Hard | `disbursement.service.ts → prepayLoan` | Prepayment penalty includes principal portion of current EMI → over-charged |
+| RG-014 | Easy | `workers/repayment-executor.ts` grace check | Grace period boundary off by one day — day 5 prematurely flagged overdue |
+| RG-015 | Medium | `disbursement.service.ts → generateStatement` | Processing fee deducted at disbursement but missing from statement transactions |

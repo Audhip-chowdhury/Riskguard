@@ -202,7 +202,7 @@ Aging analysis — loans bucketed by DPD with values.
 }
 ```
 
-**🐛 BUG RG-024 — INJECT THIS (Medium):**
+**🐛 BUG RG-024 — INJECT THIS (Hard):**
 
 ```typescript
 async function getAgingReport(asOfDate: string) {
@@ -461,7 +461,7 @@ async function computeEcl(asOfDate: string) {
 | ID | Severity | Where | What |
 |----|----------|-------|------|
 | RG-021 | Critical | `reporting.service.ts → computeNpaRatio` | NPA numerator includes written_off loans, denominator excludes them → inflated ratio |
-| RG-022 | High | `reporting.service.ts → getVintageReport` | Vintages bucketed by `created_at` instead of `disbursed_at` → cohort misclassification |
+| RG-022 | Hard | `reporting.service.ts → getVintageReport` | Vintages bucketed by `created_at` instead of `disbursed_at` → cohort misclassification |
 | RG-023 | Medium | `reporting.service.ts → computeCollectionEfficiency` | Prepayments counted as "collected" → efficiency exceeds 100% |
-| RG-024 | Medium | `reporting.service.ts → getAgingReport` | Bucket subtotals and total use different queries → totals don't add up |
-| RG-025 | Low | `reporting.service.ts → computeEcl` | pd_lookup uses UPPERCASE bands but borrower bands are mixed case → PD lookup returns 0 → ECL = 0 |
+| RG-024 | Hard | `reporting.service.ts → getAgingReport` | Bucket subtotals and total use different queries → totals don't add up |
+| RG-025 | Hard | `reporting.service.ts → computeEcl` | pd_lookup uses UPPERCASE bands but borrower bands are mixed case → PD lookup returns 0 → ECL = 0 |

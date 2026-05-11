@@ -250,27 +250,27 @@ Phase 5 delivers the executive reporting layer. Risk officers and finance leader
 
 | ID      | Phase | Severity | Discovery Difficulty | Category                 | Description                                                                       |
 |---------|-------|----------|----------------------|--------------------------|-----------------------------------------------------------------------------------|
-| RG-001  | 1     | Medium   | Hard                 | Algorithm / Calculation  | Score weights applied before normalisation, skewing composite scores              |
+| RG-001  | 1     | Medium   | Critical             | Algorithm / Calculation  | Score weights applied before normalisation, skewing composite scores              |
 | RG-002  | 1     | High     | Medium               | Input Validation         | Zero-salary borrower produces NaN credit score                                    |
 | RG-003  | 1     | Medium   | Medium               | Boundary Condition       | Score of exactly 600 misclassified as Fair instead of Good                        |
 | RG-004  | 1     | Low      | Easy                 | Sort Order               | Score history returned oldest-first instead of newest-first                       |
 | RG-005  | 1     | High     | Easy                 | Input Validation         | Manual adjustment accepts out-of-range scores (e.g., −200 or 1500)               |
-| RG-006  | 2     | High     | Hard                 | Authorization            | Conflict-of-interest check omits manager hierarchy; only blocks direct self-approval |
+| RG-006  | 2     | High     | Critical             | Authorization            | Conflict-of-interest check omits manager hierarchy; only blocks direct self-approval |
 | RG-007  | 2     | High     | Hard                 | Edge Case / Business Rule | Null debt ratio for first-time borrowers bypasses the debt-ratio threshold check  |
 | RG-008  | 2     | Medium   | Hard                 | Unit / Data Model        | Risk premium stored as percent instead of basis points; effective rate 100× too low |
 | RG-009  | 2     | Medium   | Easy                 | Business Rule            | No duplicate-appeal guard; applications can be appealed more than once            |
 | RG-010  | 2     | Medium   | Medium               | State Machine            | Withdrawal permitted on approved/disbursed loans; missing status validation       |
-| RG-011  | 3     | Medium   | Medium               | Floating Point / Precision | EMI schedule closing balance off by ~50 paise due to floating-point accumulation |
+| RG-011  | 3     | Medium   | Critical             | Floating Point / Precision | EMI schedule closing balance off by ~50 paise due to floating-point accumulation |
 | RG-012  | 3     | High     | Hard                 | Race Condition (TOCTOU)  | Worker reads due EMIs once; no re-check before debit can cause double-charge      |
 | RG-013  | 3     | Medium   | Hard                 | Calculation              | Late-fee base includes principal of current EMI, overstating the penalty          |
 | RG-014  | 3     | Low      | Easy                 | Off-by-One               | Grace period boundary at DPD ≥ 5 instead of DPD > 5; day 5 incorrectly penalised |
 | RG-015  | 3     | Low      | Medium               | Audit Trail / Completeness | Processing fee not recorded in transaction statement; only net disbursed shown   |
-| RG-016  | 4     | Medium   | Easy                 | Date / Time              | DPD computed with timezone-naive arithmetic; can be ±1 day near midnight UTC      |
+| RG-016  | 4     | Medium   | Critical             | Date / Time              | DPD computed with timezone-naive arithmetic; can be ±1 day near midnight UTC      |
 | RG-017  | 4     | High     | Medium               | Data Consistency         | Old EMI entries not superseded on restructure; remain active in collections queue |
 | RG-018  | 4     | High     | Hard                 | Data Consistency / State | Written-off principal not removed from credit exposure, blocking future borrowing  |
 | RG-019  | 4     | Medium   | Medium               | Query Logic / Boundary   | Delinquency bucket boundaries overlap; DPD=30 loan appears in both 1–30 and 31–60 |
 | RG-020  | 4     | High     | Easy                 | Authorization            | Collections agent assignment has no role check; any user can be assigned          |
-| RG-021  | 5     | Medium   | Medium               | Query Logic              | NPA numerator includes written-off loans, inflating the reported NPA ratio        |
+| RG-021  | 5     | Medium   | Critical             | Query Logic              | NPA numerator includes written-off loans, inflating the reported NPA ratio        |
 | RG-022  | 5     | Medium   | Hard                 | Query Logic / Data Model | Vintage cohorts grouped by application date, not disbursement date                |
 | RG-023  | 5     | Low      | Medium               | Query Logic / Definition | Collection efficiency numerator includes prepayment transactions                  |
 | RG-024  | 5     | Medium   | Hard                 | Data Consistency / Metrics | Aging report mixes outstanding amounts (buckets) with principal amounts (total)  |

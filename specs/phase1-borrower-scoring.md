@@ -478,7 +478,7 @@ Admin-only manual override of score and limit.
 - Updates borrower's `current_score`, `current_band`, `credit_limit`.
 - Creates a score_snapshot with `reason='manual_adjustment'`.
 
-**🐛 BUG RG-005 — INJECT THIS (Medium):**
+**🐛 BUG RG-005 — INJECT THIS (Easy):**
 
 ```typescript
 // src/services/scoring.service.ts
@@ -537,7 +537,7 @@ const seedData = [
 | ID | Severity | Where | What |
 |----|----------|-------|------|
 | RG-001 | Critical | `scoring.service.ts → computeFinalScore` | Weight normalization order error → 5-15% score drift when weights don't sum to 100% |
-| RG-002 | High | `scoring.service.ts → computeDebtRatioSubScore` | Zero/missing salary produces NaN, poisons final score |
+| RG-002 | Medium | `scoring.service.ts → computeDebtRatioSubScore` | Zero/missing salary produces NaN, poisons final score |
 | RG-003 | Medium | `scoring.service.ts → assignBand` | Score 600 lands in "Fair" instead of "Good" due to `>` vs `>=` |
-| RG-004 | Low | `borrowers.ts → score-history` | Returns ASC instead of documented DESC |
-| RG-005 | Medium | `borrowers.ts → manual-adjust` | Zod schema missing 0-1000 range validation on new_score |
+| RG-004 | Easy | `borrowers.ts → score-history` | Returns ASC instead of documented DESC |
+| RG-005 | Easy | `borrowers.ts → manual-adjust` | Zod schema missing 0-1000 range validation on new_score |

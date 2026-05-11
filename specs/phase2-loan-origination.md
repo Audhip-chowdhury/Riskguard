@@ -258,7 +258,7 @@ function computeInterestRate(productType: string, scoreBand: string): number {
 }
 ```
 
-**🐛 BUG RG-008 — INJECT THIS (Medium):**
+**🐛 BUG RG-008 — INJECT THIS (Hard):**
 
 The bug is more subtle. The function returns basis points correctly, but elsewhere in the codebase (the loan creation path):
 
@@ -423,7 +423,7 @@ Borrower appeals a rejection.
 - Application must be in `rejected` status.
 - Appeal is reviewed by a different underwriter than the original (or any senior_underwriter).
 
-**🐛 BUG RG-009 — INJECT THIS (Medium):**
+**🐛 BUG RG-009 — INJECT THIS (Easy):**
 
 ```typescript
 async function createAppeal(applicationId: string, borrowerUserId: string, reason: string, additionalInfo?: string) {
@@ -490,7 +490,7 @@ async function withdrawApplication(applicationId: string, borrowerUserId: string
 | ID | Severity | Where | What |
 |----|----------|-------|------|
 | RG-006 | Critical | `underwriting.service.ts → approveApplication` | Conflict-of-interest check misses manager-to-direct-report relationship |
-| RG-007 | High | `underwriting.service.ts → checkAutoApproval` | Null/undefined debt_ratio skips the threshold check → unqualified auto-approval |
-| RG-008 | Medium | `interest_rate_config` seed data | Risk premium values entered as percent but column labeled bps → rates 100x smaller than intended |
-| RG-009 | Medium | `underwriting.service.ts → createAppeal` | Missing existence check → multiple appeals per rejected application |
-| RG-010 | Low | `underwriting.service.ts → withdrawApplication` | Missing status validation → can withdraw approved loans |
+| RG-007 | Hard | `underwriting.service.ts → checkAutoApproval` | Null/undefined debt_ratio skips the threshold check → unqualified auto-approval |
+| RG-008 | Hard | `interest_rate_config` seed data | Risk premium values entered as percent but column labeled bps → rates 100x smaller than intended |
+| RG-009 | Easy | `underwriting.service.ts → createAppeal` | Missing existence check → multiple appeals per rejected application |
+| RG-010 | Medium | `underwriting.service.ts → withdrawApplication` | Missing status validation → can withdraw approved loans |
