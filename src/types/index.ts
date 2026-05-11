@@ -175,3 +175,74 @@ export interface Prepayment {
   schedule_recalculated: number;
   created_at: string;
 }
+
+export interface DpdRecord {
+  id: string;
+  loan_id: string;
+  as_of_date: string;
+  days_past_due: number;
+  overdue_emi_count: number;
+  overdue_principal: number;
+  overdue_interest: number;
+  overdue_penalty: number;
+  bucket: string;
+  created_at: string;
+}
+
+export interface CollectionsAction {
+  id: string;
+  loan_id: string;
+  action_type: string;
+  trigger_dpd: number;
+  assigned_agent_user_id: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface CollectionsAssignment {
+  id: string;
+  loan_id: string;
+  agent_user_id: string;
+  assigned_at: string;
+  assigned_by_user_id: string;
+  is_active: number;
+}
+
+export interface Restructuring {
+  id: string;
+  loan_id: string;
+  previous_principal_outstanding: number;
+  previous_tenure_remaining_months: number;
+  previous_emi: number;
+  previous_annual_rate_bps: number;
+  new_tenure_months: number;
+  new_emi: number;
+  new_annual_rate_bps: number;
+  reason: string;
+  approved_by_user_id: string;
+  new_schedule_generated: number;
+  created_at: string;
+}
+
+export interface WriteOff {
+  id: string;
+  loan_id: string;
+  outstanding_at_write_off: number;
+  principal_lost: number;
+  interest_lost: number;
+  penalty_lost: number;
+  reason: string;
+  written_off_by_user_id: string;
+  created_at: string;
+}
+
+export interface Recovery {
+  id: string;
+  write_off_id: string;
+  loan_id: string;
+  recovered_amount: number;
+  recovery_source: string;
+  payflow_transaction_id: string | null;
+  notes: string | null;
+  recovered_at: string;
+}

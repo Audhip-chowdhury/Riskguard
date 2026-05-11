@@ -26,10 +26,31 @@ import {
   prepayLoan,
   generateStatement,
 } from '../services/disbursement.service';
+import {
+  restructureLoan,
+  writeOffLoan,
+  recordRecovery,
+} from '../services/collections.service';
 
 const router = Router();
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
+
+const restructureSchema = z.object({
+  new_tenure_months: z.number().int().positive(),
+  new_annual_rate_bps: z.number().int().positive(),
+  reason: z.string().min(30),
+});
+
+const writeOffSchema = z.object({
+  reason: z.string().min(50),
+});
+
+const recoverySchema = z.object({
+  amount: z.string().regex(/^\d+\.\d{2}$/, 'Must be a decimal string like "1000.00"'),
+  recovery_source: z.enum(['voluntary_payment', 'legal_settlement', 'asset_sale']),
+  notes: z.string().optional(),
+});
 
 const repaySchema = z.object({
   amount: z.string().regex(/^\d+\.\d{2}$/, 'Must be a decimal string like "1000.00"'),
@@ -445,6 +466,42 @@ router.get('/:id/statement', auth, (req: Request, res: Response) => {
 
   const data = generateStatement(req.params.id);
   return res.json({ success: true, data });
+});
+
+// ─── POST /api/v1/loans/:id/restructure ──────────────────────────────────────
+
+router.post('/:id/restructure', auth, async (req: Request, res: Response) => {
+  const user = req.user!;
+  if (!['senior_underwriter', 'admin'].includes(user.role)) {
+    throw new AppError(403, 'FORBIDDEN', 'Only senior_underwriter or admin can restructure loans');
+  }
+  const body = restructureSchema.parse(req.body);
+  const data = restructureLoan(req.params.id, body, user.id);
+  return res.json({ success: true, data });
+});
+
+// ─── POST /api/v1/loans/:id/write-off ────────────────────────────────────────
+
+router.post('/:id/write-off', auth, async (req: Request, res: Response) => {
+  const user = req.user!;
+  if (user.role !== 'admin') {
+    throw new AppError(403, 'FORBIDDEN', 'Only admin can write off loans');
+  }
+  const { reason } = writeOffSchema.parse(req.body);
+  const data = await writeOffLoan(req.params.id, reason, user.id);
+  return res.json({ success: true, data });
+});
+
+// ─── POST /api/v1/loans/:id/record-recovery ──────────────────────────────────
+
+router.post('/:id/record-recovery', auth, async (req: Request, res: Response) => {
+  const user = req.user!;
+  if (!['admin', 'collections_agent'].includes(user.role)) {
+    throw new AppError(403, 'FORBIDDEN', 'Only admin or collections_agent can record recoveries');
+  }
+  const body = recoverySchema.parse(req.body);
+  const data = await recordRecovery(req.params.id, body, user.id);
+  return res.status(201).json({ success: true, data });
 });
 
 export default router;
