@@ -56,7 +56,8 @@ Currency: SimCash (SIM)
 
 \## Completed Phases
 
-(update this after each phase is built and tested)
+* **## Completed Phases**
+* **- Phase 1: Borrower profiles, credit scoring engine, score history, manual adjustments (bugs RG-001 to RG-005) ✓**
 
 
 
