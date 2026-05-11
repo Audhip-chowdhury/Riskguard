@@ -19,10 +19,27 @@ import {
   withdrawApplication,
 } from '../services/underwriting.service';
 import { LoanApplication, Loan, UnderwritingDecision, Appeal } from '../types';
+import {
+  disburse,
+  getSchedule,
+  repayLoan,
+  prepayLoan,
+  generateStatement,
+} from '../services/disbursement.service';
 
 const router = Router();
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
+
+const repaySchema = z.object({
+  amount: z.string().regex(/^\d+\.\d{2}$/, 'Must be a decimal string like "1000.00"'),
+  emi_schedule_id: z.string().uuid().optional(),
+});
+
+const prepaySchema = z.object({
+  amount: z.string().regex(/^\d+\.\d{2}$/).optional(),
+  type: z.enum(['partial', 'full']),
+});
 
 const applySchema = z.object({
   product_type: z.enum(['salary_advance', 'personal_loan', 'line_of_credit', 'bnpl', 'emergency_loan']),
@@ -357,6 +374,77 @@ router.post('/:id/withdraw', auth, idempotency, (req: Request, res: Response) =>
     success: true,
     data: { application_id: req.params.id, status: 'withdrawn' },
   });
+});
+
+// ─── POST /api/v1/loans/:id/disburse ─────────────────────────────────────────
+
+router.post('/:id/disburse', auth, idempotency, async (req: Request, res: Response) => {
+  const user = req.user!;
+  if (!['admin', 'senior_underwriter'].includes(user.role)) {
+    throw new AppError(403, 'FORBIDDEN', 'Only admin or senior_underwriter can disburse loans');
+  }
+  const data = await disburse(req.params.id, user.id);
+  return res.json({ success: true, data });
+});
+
+// ─── GET /api/v1/loans/:id/schedule ──────────────────────────────────────────
+
+router.get('/:id/schedule', auth, (req: Request, res: Response) => {
+  const user = req.user!;
+  const loan = db.prepare('SELECT * FROM loans WHERE id = ?').get(req.params.id) as Loan | undefined;
+  if (!loan) throw new AppError(404, 'NOT_FOUND', 'Loan not found');
+
+  const elevated = ['underwriter', 'senior_underwriter', 'admin'].includes(user.role);
+  if (!elevated) {
+    const borrower = db
+      .prepare(`SELECT b.id FROM borrowers b JOIN employees e ON e.id = b.employee_id WHERE e.user_id = ?`)
+      .get(user.id) as { id: string } | undefined;
+    if (!borrower || borrower.id !== loan.borrower_id) {
+      throw new AppError(403, 'FORBIDDEN', 'You can only view your own loan schedule');
+    }
+  }
+
+  const data = getSchedule(req.params.id);
+  return res.json({ success: true, data });
+});
+
+// ─── POST /api/v1/loans/:id/repay ────────────────────────────────────────────
+
+router.post('/:id/repay', auth, idempotency, async (req: Request, res: Response) => {
+  const { amount, emi_schedule_id } = repaySchema.parse(req.body);
+  const amountPaise = simToPaisa(amount);
+  const data = await repayLoan(req.params.id, amountPaise, emi_schedule_id, req.user!.id);
+  return res.status(201).json({ success: true, data });
+});
+
+// ─── POST /api/v1/loans/:id/prepay ───────────────────────────────────────────
+
+router.post('/:id/prepay', auth, idempotency, async (req: Request, res: Response) => {
+  const { amount, type } = prepaySchema.parse(req.body);
+  const amountPaise = amount ? simToPaisa(amount) : undefined;
+  const data = await prepayLoan(req.params.id, amountPaise, type, req.user!.id);
+  return res.status(201).json({ success: true, data });
+});
+
+// ─── GET /api/v1/loans/:id/statement ─────────────────────────────────────────
+
+router.get('/:id/statement', auth, (req: Request, res: Response) => {
+  const user = req.user!;
+  const loan = db.prepare('SELECT * FROM loans WHERE id = ?').get(req.params.id) as Loan | undefined;
+  if (!loan) throw new AppError(404, 'NOT_FOUND', 'Loan not found');
+
+  const elevated = ['underwriter', 'senior_underwriter', 'admin'].includes(user.role);
+  if (!elevated) {
+    const borrower = db
+      .prepare(`SELECT b.id FROM borrowers b JOIN employees e ON e.id = b.employee_id WHERE e.user_id = ?`)
+      .get(user.id) as { id: string } | undefined;
+    if (!borrower || borrower.id !== loan.borrower_id) {
+      throw new AppError(403, 'FORBIDDEN', 'You can only view your own loan statement');
+    }
+  }
+
+  const data = generateStatement(req.params.id);
+  return res.json({ success: true, data });
 });
 
 export default router;

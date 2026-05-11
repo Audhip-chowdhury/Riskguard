@@ -59,6 +59,7 @@ Currency: SimCash (SIM)
 \- Phase 1: Borrower profiles, credit scoring engine, score history, manual adjustments (bugs RG-001 to RG-005) ✓
 
 \- Phase 2: Loan applications, auto/manual/committee underwriting, appeals, conflict of interest (bugs RG-006 to RG-010) ✓
+- Phase 3: EMI schedule, disbursement via PayFlow, repayment worker, prepayment with penalty (bugs RG-011 to RG-015) ✓
 
 \## Known Bugs (INTENTIONAL — DO NOT FIX)
 

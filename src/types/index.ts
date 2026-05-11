@@ -117,3 +117,61 @@ export interface Appeal {
   review_notes: string | null;
   created_at: string;
 }
+
+export interface Disbursement {
+  id: string;
+  loan_id: string;
+  requested_amount: number;
+  processing_fee: number;
+  net_disbursed_amount: number;
+  payflow_transaction_id: string | null;
+  status: string;
+  error_message: string | null;
+  disbursed_at: string | null;
+  created_at: string;
+}
+
+export interface EmiSchedule {
+  id: string;
+  loan_id: string;
+  installment_number: number;
+  due_date: string;
+  emi_amount: number;
+  principal_component: number;
+  interest_component: number;
+  opening_balance: number;
+  closing_balance: number;
+  status: string;
+  paid_amount: number;
+  paid_at: string | null;
+  late_penalty: number;
+}
+
+export interface Repayment {
+  id: string;
+  loan_id: string;
+  emi_schedule_id: string | null;
+  type: string;
+  amount: number;
+  principal_paid: number;
+  interest_paid: number;
+  late_penalty_paid: number;
+  prepayment_penalty_paid: number;
+  payflow_transaction_id: string | null;
+  status: string;
+  error_message: string | null;
+  initiated_at: string;
+  completed_at: string | null;
+}
+
+export interface Prepayment {
+  id: string;
+  loan_id: string;
+  type: string;
+  prepayment_amount: number;
+  penalty_amount: number;
+  outstanding_at_prepayment: number;
+  repayment_id: string;
+  schedule_recalculated: number;
+  created_at: string;
+}
