@@ -18,6 +18,10 @@ beforeAll(() => {
   // Wipe and re-create schema (Phase 2 tables listed before Phase 1 to respect FK order)
   db.exec('PRAGMA foreign_keys = OFF');
   db.exec(`
+    DROP TABLE IF EXISTS ecl_projections;
+    DROP TABLE IF EXISTS pd_lookup;
+    DROP TABLE IF EXISTS risk_thresholds;
+    DROP TABLE IF EXISTS portfolio_snapshots;
     DROP TABLE IF EXISTS recoveries;
     DROP TABLE IF EXISTS write_offs;
     DROP TABLE IF EXISTS restructurings;

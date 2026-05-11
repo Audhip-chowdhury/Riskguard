@@ -60,11 +60,14 @@ Currency: SimCash (SIM)
 
 \- Phase 2: Loan applications, auto/manual/committee underwriting, appeals, conflict of interest (bugs RG-006 to RG-010) ✓
 
-\-Phase 3: EMI schedule, disbursement via PayFlow, repayment worker, prepayment with penalty (bugs RG-011 to RG-015) ✓
+\- Phase 3: EMI schedule, disbursement via PayFlow, repayment worker, prepayment with penalty (bugs RG-011 to RG-015) ✓
 
 \- Phase 4: DPD tracking, collections queue, restructuring, write-offs, recovery, agent assignment (bugs RG-016 to RG-020) ✓
 
-\## Known Bugs (INTENTIONAL — DO NOT FIX)
+\- Phase 5: Portfolio dashboard, aging, vintage, concentration risk, ECL projections (bugs RG-021 to RG-025) ✓
+
+
+## Known Bugs (INTENTIONAL — DO NOT FIX)
 
 This project has intentional bugs for QA training.
 
