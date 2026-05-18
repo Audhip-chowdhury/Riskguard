@@ -145,7 +145,8 @@ router.post('/:id/recompute-score', auth, idempotency, async (req: Request, res:
     )
     .get(req.params.id) as (Record<string, unknown> & {
       id: string; user_id: string; current_score: number; current_band: string;
-      credit_limit: number; monthly_salary: number; department_risk_tier: number; joined_at: string;
+      credit_limit: number; available_limit: number;
+      monthly_salary: number; department_risk_tier: number; joined_at: string;
     }) | undefined;
 
   if (!borrower) throw new AppError(404, 'NOT_FOUND', 'Borrower not found');
@@ -185,12 +186,19 @@ router.post('/:id/recompute-score', auth, idempotency, async (req: Request, res:
   const ts = now();
   const snapshotId = uuidv4();
 
+  const newAvailableLimit = reconcileAvailableLimit(
+    borrower.credit_limit,
+    borrower.available_limit,
+    creditLimit
+  );
+
   db.transaction(() => {
     db.prepare(
       `UPDATE borrowers
-       SET current_score = ?, current_band = ?, credit_limit = ?, last_scored_at = ?, updated_at = ?
+       SET current_score = ?, current_band = ?, credit_limit = ?, available_limit = ?,
+           last_scored_at = ?, updated_at = ?
        WHERE id = ?`
-    ).run(score, band, creditLimit, ts, ts, borrower.id);
+    ).run(score, band, creditLimit, newAvailableLimit, ts, ts, borrower.id);
 
     db.prepare(
       `INSERT INTO score_snapshots
@@ -270,11 +278,17 @@ router.post('/:id/manual-adjust', auth, idempotency, async (req: Request, res: R
   const borrower = db
     .prepare('SELECT * FROM borrowers WHERE id = ?')
     .get(req.params.id) as (Record<string, unknown> & {
-      id: string; current_score: number; current_band: string; credit_limit: number;
+      id: string; current_score: number; current_band: string;
+      credit_limit: number; available_limit: number;
     }) | undefined;
   if (!borrower) throw new AppError(404, 'NOT_FOUND', 'Borrower not found');
 
   const newCreditLimit = simToPaisa(body.new_credit_limit);
+  const newAvailableLimit = reconcileAvailableLimit(
+    borrower.credit_limit,
+    borrower.available_limit,
+    newCreditLimit
+  );
   const { band } = assignBand(body.new_score);
   const ts = now();
   const adjustmentId = uuidv4();
@@ -294,9 +308,10 @@ router.post('/:id/manual-adjust', auth, idempotency, async (req: Request, res: R
 
     db.prepare(
       `UPDATE borrowers
-       SET current_score = ?, current_band = ?, credit_limit = ?, last_scored_at = ?, updated_at = ?
+       SET current_score = ?, current_band = ?, credit_limit = ?, available_limit = ?,
+           last_scored_at = ?, updated_at = ?
        WHERE id = ?`
-    ).run(body.new_score, band, newCreditLimit, ts, ts, borrower.id);
+    ).run(body.new_score, band, newCreditLimit, newAvailableLimit, ts, ts, borrower.id);
 
     db.prepare(
       `INSERT INTO score_snapshots
@@ -322,6 +337,15 @@ router.post('/:id/manual-adjust', auth, idempotency, async (req: Request, res: R
     },
   });
 });
+
+function reconcileAvailableLimit(
+  creditLimit: number,
+  availableLimit: number,
+  newCreditLimit: number
+): number {
+  const exposure = creditLimit - availableLimit;
+  return Math.max(0, newCreditLimit - exposure);
+}
 
 function formatBorrower(b: Record<string, unknown>) {
   return {
